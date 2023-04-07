@@ -11,6 +11,7 @@
 #define mapX 8
 #define mapY 8
 #define mapS 64
+#define PI 3.14159265359
 
 int map[]=
         {
@@ -44,34 +45,90 @@ void drawMap2D() {
     }
 }
 
+void dessinerJoueur(float px, float py) {
+    al_draw_filled_circle(px, py, 8, al_map_rgb(255, 255, 0));
+
+}
+
+void InputClavier(ALLEGRO_EVENT events, float *px, float *py, float *pdx, float *pdy, float *pa, bool *done)
+
+{
+    switch(events.keyboard.keycode)
+    {
+        case ALLEGRO_KEY_DOWN:
+            (*px) -= (*pdx);
+            (*py) -= (*pdy);
+
+
+            break;
+        case ALLEGRO_KEY_UP:
+            (*px) += (*pdx);
+            (*py) += (*pdy);
+            break;
+        case ALLEGRO_KEY_RIGHT:
+            (*pa) += 0.1;
+            if((*pa)>2*PI){
+                (*pa)-=2*PI;
+            }
+            (*pdx) = cos((*pa))*5;
+            (*pdy) = sin((*pa))*5;
+            break;
+        case ALLEGRO_KEY_LEFT:
+            (*pa) -= 0.1;
+            if((*pa)<0){
+                (*pa)+=2*PI;
+            }
+            (*pdx) = cos((*pa))*5;
+            (*pdy) = sin((*pa))*5;
+            break;
+        case ALLEGRO_KEY_ESCAPE:
+            (*done) = true;
+            break;
+
+
+    }
+}
+
+
 int main() {
     if(!al_init()){
         al_show_native_message_box(NULL, NULL, NULL, "Initialisation d'ALLEGRO 5 impossible", NULL, NULL);
         return -1;
+    }
+    //___________Initialisation des addons___________//
+    al_init_primitives_addon();
+    al_install_keyboard();
 
-        }
-        //___________Initialisation des addons___________//
-        al_init_primitives_addon();
-        al_install_keyboard();
-
-        //_______________________________________________//
-        ALLEGRO_DISPLAY* display;
-        display = al_create_display(WIDTH, HEIGHT);
-        al_clear_to_color(al_map_rgb(150,150,150));
+    //_______________________________________________//
+    ALLEGRO_DISPLAY* display;
+    display = al_create_display(WIDTH, HEIGHT);
+    al_clear_to_color(al_map_rgb(150,150,150));
 
 
-        al_set_window_title(display, "RayTracing_BETA");
-        if(!display){
+    al_set_window_title(display, "RayTracing_BETA");
+    if(!display){
             al_show_native_message_box(display, "Sample TItle", "erreur","test", NULL, ALLEGRO_MESSAGEBOX_QUESTION );
-        }
-        ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
-        al_register_event_source(event_queue, al_get_keyboard_event_source());
+    }
+    ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
+    al_register_event_source(event_queue, al_get_keyboard_event_source());
 
-        bool done = false;
+    float px, py, pdx, pdy, pa;
+
+    bool done = false;
+    px = 300, py = 300;
+    pdx = 0;
+    pdy = 0;
+    pa = 0;
     while(!done)
     {
+        ALLEGRO_EVENT events;
+        al_wait_for_event(event_queue, &events);
+        if(events.type = ALLEGRO_EVENT_KEY_DOWN)
+        {
+            InputClavier(events, &px, &py, &pdx, &pdy, &pa, &done);
+        }
         drawMap2D();
-
+        dessinerJoueur(px, py);
 
         al_flip_display();
         al_clear_to_color(al_map_rgb(100,100,100));
